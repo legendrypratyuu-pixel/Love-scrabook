@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Letters 💌</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Letters for You 💌</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="memories.html">Memories</a>
+      <a href="letters.html">Letters</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>My Words for You</h2>
+    <div class="letter">
+      <p>Every moment with you is like a page in a fairytale. 🌸</p>
+    </div>
+    <div class="letter">
+      <p>I love you more with each passing day 💕</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>To my forever person 💖</p>
+  </footer>
+</body>
+</html>
