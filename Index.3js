@@ -1,0 +1,4 @@
+{/* My Memory Section with Live Preview */}
+<ScrapbookSection title="💖 Add Your Memory">
+  <MemoryForm />
+</ScrapbookSection>
