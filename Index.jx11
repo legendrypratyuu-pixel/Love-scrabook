@@ -1,0 +1,310 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const App = () => {
+  const [notes, setNotes] = useState([]);
+  const [photos, setPhotos] = useState([]);
+  const [timeline, setTimeline] = useState([]);
+  const [theme, setTheme] = useState('romantic');
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
+  const [heartMessage, setHeartMessage] = useState("I love you! You make my heart flutter every day. ❤️");
+
+  // Load data from localStorage
+  useEffect(() => {
+    try {
+      const storedNotes = localStorage.getItem("notes");
+      const storedPhotos = localStorage.getItem("photos");
+      const storedTimeline = localStorage.getItem("timeline");
+      const storedTheme = localStorage.getItem("theme");
+      const storedHeartMessage = localStorage.getItem("heartMessage");
+
+      if (storedNotes) setNotes(JSON.parse(storedNotes));
+      if (storedPhotos) setPhotos(JSON.parse(storedPhotos));
+      if (storedTimeline) setTimeline(JSON.parse(storedTimeline));
+      if (storedTheme) setTheme(storedTheme);
+      if (storedHeartMessage) setHeartMessage(storedHeartMessage);
+    } catch (e) {
+      console.error("Failed to load data from localStorage", e);
+    }
+  }, []);
+
+  // Save data to localStorage
+  useEffect(() => { localStorage.setItem("notes", JSON.stringify(notes)); }, [notes]);
+  useEffect(() => { localStorage.setItem("photos", JSON.stringify(photos)); }, [photos]);
+  useEffect(() => { localStorage.setItem("timeline", JSON.stringify(timeline)); }, [timeline]);
+  useEffect(() => { localStorage.setItem("theme", theme); }, [theme]);
+  useEffect(() => { localStorage.setItem("heartMessage", heartMessage); }, [heartMessage]);
+
+  const addNote = (event) => {
+    event.preventDefault();
+    const note = event.target.note.value.trim();
+    if (note) {
+      setNotes(prevNotes => [note, ...prevNotes]);
+      event.target.note.value = '';
+    }
+  };
+
+  const addPhoto = (event) => {
+    event.preventDefault();
+    const files = event.target.photo.files;
+    const caption = event.target.caption.value;
+
+    if (files.length > 0) {
+      [...files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setPhotos(prevPhotos => [{ src: e.target.result, caption }, ...prevPhotos]);
+        };
+        reader.readAsDataURL(file);
+      });
+      event.target.photo.value = '';
+      event.target.caption.value = '';
+    }
+  };
+
+  const addTimeline = (event) => {
+    event.preventDefault();
+    const date = event.target.date.value;
+    const title = event.target.title.value;
+    const desc = event.target.desc.value;
+    if (date && title) {
+      setTimeline(prevTimeline => [{ date, title, desc }, ...prevTimeline]);
+      event.target.date.value = '';
+      event.target.title.value = '';
+      event.target.desc.value = '';
+    }
+  };
+
+  const deleteItem = (setter, index) => {
+    setter(prevItems => prevItems.filter((_, i) => i !== index));
+  };
+
+  const toggleHeartAnimation = () => {
+    setIsMessageVisible(prev => !prev);
+  };
+
+  const exportData = () => {
+    const data = { notes, photos, timeline, theme, heartMessage };
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "love-scrapbook.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const importedData = JSON.parse(ev.target.result);
+        if (importedData.notes) setNotes(importedData.notes);
+        if (importedData.photos) setPhotos(importedData.photos);
+        if (importedData.timeline) setTimeline(importedData.timeline);
+        if (importedData.theme) setTheme(importedData.theme);
+        if (importedData.heartMessage) setHeartMessage(importedData.heartMessage);
+      } catch (e) {
+        console.error("Failed to import data", e);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const themes = {
+    romantic: 'bg-gradient-to-br from-[#ffdde1] to-[#ee9ca7] text-gray-800',
+    light: 'bg-gray-50 text-gray-800',
+    dark: 'bg-gray-900 text-gray-200',
+  };
+  const sectionThemes = {
+    romantic: 'bg-white bg-opacity-80 text-gray-800',
+    light: 'bg-white text-gray-800',
+    dark: 'bg-gray-800 text-gray-200',
+  };
+  const cardThemes = {
+    romantic: 'bg-white text-gray-800',
+    light: 'bg-white text-gray-800',
+    dark: 'bg-gray-700 text-gray-200',
+  };
+  const headerThemes = {
+    romantic: 'bg-white bg-opacity-80 text-[#e91e63]',
+    light: 'bg-white text-gray-800',
+    dark: 'bg-gray-800 text-[#ff79c6]',
+  };
+  const buttonThemes = {
+    romantic: 'bg-[#e91e63] hover:bg-[#d81b60] text-white',
+    light: 'bg-blue-500 hover:bg-blue-600 text-white',
+    dark: 'bg-[#ff79c6] hover:bg-[#d81b60] text-white',
+  };
+
+  const ScrapbookSection = ({ children, title, id }) => (
+    <section id={id} className={`max-w-4xl mx-auto my-8 p-6 rounded-2xl shadow-xl transition-colors duration-400 ${sectionThemes[theme]}`}>
+      <h2 className={`text-3xl font-bold mb-4 ${headerThemes[theme]}`}>{title}</h2>
+      {children}
+    </section>
+  );
+
+  return (
+    <div className={`min-h-screen font-sans ${themes[theme]} transition-colors duration-400`}>
+      {/* Header */}
+      <header className={`sticky top-0 z-10 p-4 text-center backdrop-blur-sm ${headerThemes[theme]}`}>
+        <h1 className="text-4xl font-bold mb-2" contentEditable="true">💖 Our Love Scrapbook 💖</h1>
+        <label className="text-sm font-medium">
+          Theme:
+          <select
+            className={`ml-2 p-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-opacity-50 ${theme === 'dark' ? 'bg-gray-700 text-gray-200 border-gray-600 focus:ring-purple-500' : 'bg-white text-gray-800 border-gray-300 focus:ring-pink-500'}`}
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+          >
+            <option value="romantic">Romantic</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </header>
+
+      {/* Heart Section */}
+      <ScrapbookSection title="Click My Heart!">
+        <div className="flex flex-col items-center">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
+            className="text-8xl p-4 transition-transform duration-200 focus:outline-none"
+            onClick={toggleHeartAnimation}
+          >
+            ❤️
+          </motion.button>
+          <AnimatePresence>
+            {isMessageVisible && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className={`mt-4 p-6 rounded-2xl shadow-lg transition-opacity duration-500 text-center ${sectionThemes[theme]}`}
+              >
+                <textarea
+                  value={heartMessage}
+                  onChange={(e) => setHeartMessage(e.target.value)}
+                  className="w-full p-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 text-center text-xl font-semibold resize-none"
+                  rows={3}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </ScrapbookSection>
+
+      {/* Love Notes Section */}
+      <ScrapbookSection title="💌 Love Notes">
+        <form onSubmit={addNote} className="flex gap-2 mb-4 flex-wrap">
+          <input
+            name="note"
+            type="text"
+            placeholder="Write a note..."
+            className="flex-grow p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200"
+          />
+          <button type="submit" className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>Add</button>
+        </form>
+        <AnimatePresence initial={false}>
+          <div className="flex flex-col-reverse gap-3">
+            {notes.map((note, index) => (
+              <motion.div
+                key={note + index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+                className={`p-4 rounded-xl shadow-md flex items-center justify-between ${cardThemes[theme]}`}
+              >
+                <p className="flex-grow">{note}</p>
+                <button onClick={() => deleteItem(setNotes, index)} className={`ml-4 px-3 py-1 rounded-full text-xs font-bold transition-colors duration-200 ${buttonThemes[theme]}`}>Delete</button>
+              </motion.div>
+            ))}
+          </div>
+        </AnimatePresence>
+      </ScrapbookSection>
+
+      {/* Photo Gallery Section */}
+      <ScrapbookSection title="📸 Memories Gallery">
+        <form onSubmit={addPhoto} className="flex flex-col sm:flex-row gap-2 mb-4 flex-wrap">
+          <input name="photo" type="file" accept="image/*" multiple className="flex-grow p-2 rounded-xl border border-gray-300 transition-colors duration-200" />
+          <input name="caption" placeholder="Caption..." className="flex-grow p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200" />
+          <button type="submit" className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>Upload</button>
+        </form>
+        <AnimatePresence initial={false}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photos.map((photo, index) => (
+              <motion.div
+                key={photo.src + index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                className={`p-4 rounded-xl shadow-md ${cardThemes[theme]}`}
+              >
+                <img src={photo.src} alt={photo.caption} className="w-full h-48 object-cover rounded-lg mb-2" />
+                <p className="text-center italic">{photo.caption}</p>
+                <button onClick={() => deleteItem(setPhotos, index)} className={`mt-2 w-full px-3 py-1 rounded-full text-xs font-bold transition-colors duration-200 ${buttonThemes[theme]}`}>Delete</button>
+              </motion.div>
+            ))}
+          </div>
+        </AnimatePresence>
+      </ScrapbookSection>
+
+      {/* Timeline Section */}
+      <ScrapbookSection title="⏳ Our Journey">
+        <form onSubmit={addTimeline} className="flex flex-col sm:flex-row gap-2 mb-4 flex-wrap">
+          <input name="date" type="date" className="p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200" />
+          <input name="title" placeholder="Title" className="flex-grow p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200" />
+          <input name="desc" placeholder="Description" className="flex-grow p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200" />
+          <button type="submit" className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>Add</button>
+        </form>
+        <AnimatePresence initial={false}>
+          <div className="flex flex-col-reverse gap-3">
+            {timeline.map((item, index) => (
+              <motion.div
+                key={item.date + index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+                className={`p-4 rounded-xl shadow-md ${cardThemes[theme]}`}
+              >
+                <h3 className="font-bold text-lg mb-1">{item.date} - {item.title}</h3>
+                <p>{item.desc}</p>
+                <button onClick={() => deleteItem(setTimeline, index)} className={`mt-2 px-3 py-1 rounded-full text-xs font-bold transition-colors duration-200 ${buttonThemes[theme]}`}>Delete</button>
+              </motion.div>
+            ))}
+          </div>
+        </AnimatePresence>
+      </ScrapbookSection>
+
+      {/* Background Music */}
+      <ScrapbookSection title="🎶 Background Music">
+        <input type="file" accept="audio/*" onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) document.getElementById('musicPlayer').src = URL.createObjectURL(file);
+        }} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" />
+        <audio id="musicPlayer" controls className="mt-4 w-full"></audio>
+      </ScrapbookSection>
+
+      {/* Footer */}
+      <footer className={`text-center p-6 ${themes[theme]} bg-opacity-80`}>
+        <p className="mb-4">Made with 💖 | Everything saves automatically</p>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <button onClick={exportData} className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>📤 Export</button>
+          <label className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>
+            <input type="file" id="importFile" accept="application/json" onChange={importData} className="hidden" />📥 Import
+          </label>
+          <button onClick={() => window.print()} className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}>🖨️ Print</button>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
