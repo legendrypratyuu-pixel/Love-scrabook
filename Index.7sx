@@ -1,0 +1,79 @@
+<ScrapbookSection title="💖 Our Memories">
+  <div className="flex flex-col items-center mb-6">
+    {/* Heart Animation with Message */}
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      animate={{ scale: [1, 1.1, 1] }}
+      transition={{ duration: 1, repeat: Infinity }}
+      className="text-8xl p-4 transition-transform duration-200 focus:outline-none"
+      onClick={() => setIsMessageVisible(prev => !prev)}
+    >
+      ❤️
+    </motion.button>
+    <AnimatePresence>
+      {isMessageVisible && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="mt-4 p-6 rounded-2xl shadow-lg text-center bg-white bg-opacity-80"
+        >
+          <p className="text-2xl font-semibold text-pink-600">
+            I love you! You make my heart flutter every day. ❤️
+          </p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+
+  {/* Image Gallery */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[
+      "https://i.postimg.cc/DJdGr5RP/image.jpg",
+      "https://i.postimg.cc/Q9s9d1V9/image.jpg",
+      "https://i.postimg.cc/Zv5Wrm8J/image.jpg",
+      "https://i.postimg.cc/hXkQNHB0/image.jpg",
+      "https://i.postimg.cc/PCp83dBx/image.jpg",
+      "https://i.postimg.cc/rKp441j5/image.jpg",
+      "https://i.postimg.cc/Rqdfqs7M/image.jpg",
+      "https://i.postimg.cc/14mVxGLb/image.jpg",
+      "https://i.postimg.cc/6y1vf8bg/image.jpg",
+      "https://i.postimg.cc/R3wJmXCx/image.jpg",
+      "https://i.postimg.cc/gXDwXj6M/image.jpg",
+    ].map((url, index) => (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.5 }}
+        transition={{ duration: 0.3 }}
+        whileHover={{ scale: 1.05 }}
+        className="p-4 rounded-xl shadow-md bg-white"
+      >
+        <img
+          src={url}
+          alt={`Memory ${index + 1}`}
+          className="w-full h-48 object-cover rounded-lg mb-2"
+        />
+        <p className="text-center italic">Memory #{index + 1}</p>
+      </motion.div>
+    ))}
+  </div>
+
+  {/* Background Music */}
+  <div className="mt-6 w-full">
+    <input
+      type="file"
+      accept="audio/*"
+      onChange={(e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          document.getElementById('musicPlayer').src = url;
+        }
+      }}
+      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+    />
+    <audio id="musicPlayer" controls className="mt-4 w-full"></audio>
+  </div>
+</ScrapbookSection>
