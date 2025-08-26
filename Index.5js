@@ -1,0 +1,31 @@
+<AnimatePresence>
+  {hearts.map(h => (
+    <motion.span
+      key={h.id}
+      initial={{ opacity: 0, y: 0, scale: 0.8, rotate: 0 }}
+      animate={{
+        opacity: 1,
+        y: -120,
+        scale: h.sizeScale,
+        rotate: [0, h.rotateAngle, -h.rotateAngle, 0],
+        x: [0, h.sway, -h.sway, 0]
+      }}
+      exit={{ opacity: 0 }}
+      transition={{
+        duration: 2 + Math.random(), // slight variation in speed
+        ease: 'easeOut',
+        rotate: { repeat: Infinity, repeatType: 'loop', duration: 2 + Math.random() },
+        x: { repeat: Infinity, repeatType: 'loop', duration: 2 + Math.random() }
+      }}
+      style={{
+        position: 'absolute',
+        left: `${h.left}%`,
+        bottom: 10,
+        fontSize: h.size,
+        color: h.color,
+      }}
+    >
+      ❤️
+    </motion.span>
+  ))}
+</AnimatePresence>
