@@ -1,0 +1,82 @@
+const MemoryForm = () => {
+  const [preview, setPreview] = useState(null); // To show live preview
+  const [theme] = useState('romantic'); // Use current theme or pass as prop
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const message = e.target.message.value.trim();
+    const file = e.target.photo.files[0];
+    const caption = e.target.caption.value.trim();
+    const musicFile = e.target.music.files[0];
+
+    // Add note
+    if (message) setNotes(prev => [message, ...prev]);
+
+    // Add photo
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setPhotos(prev => [{ src: ev.target.result, caption }, ...prev]);
+        setPreview({ message, src: ev.target.result, caption }); // Update preview
+      };
+      reader.readAsDataURL(file);
+    } else if (message) {
+      setPreview({ message }); // Preview just message if no photo
+    }
+
+    // Add music
+    if (musicFile) {
+      const url = URL.createObjectURL(musicFile);
+      document.getElementById('musicPlayer').src = url;
+    }
+
+    e.target.reset();
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 mb-4">
+        <textarea
+          name="message"
+          placeholder="Write your message..."
+          className="p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200"
+        />
+        <input
+          type="file"
+          name="photo"
+          accept="image/*"
+          className="p-2 rounded-xl border border-gray-300 transition-colors duration-200"
+        />
+        <input
+          type="text"
+          name="caption"
+          placeholder="Photo caption..."
+          className="p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 transition-colors duration-200"
+        />
+        <input
+          type="file"
+          name="music"
+          accept="audio/*"
+          className="p-2 rounded-xl border border-gray-300 transition-colors duration-200"
+        />
+        <button
+          type="submit"
+          className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 ${buttonThemes[theme]}`}
+        >
+          Add Memory
+        </button>
+      </form>
+
+      {/* Live Preview */}
+      {preview && (
+        <div className={`p-4 rounded-xl shadow-md mb-4 ${cardThemes[theme]}`}>
+          {preview.message && <p className="mb-2 font-semibold">{preview.message}</p>}
+          {preview.src && (
+            <img src={preview.src} alt={preview.caption} className="w-full h-48 object-cover rounded-lg mb-2" />
+          )}
+          {preview.caption && <p className="text-center italic">{preview.caption}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
